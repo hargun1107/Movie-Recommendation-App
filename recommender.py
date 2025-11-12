@@ -1,10 +1,14 @@
 import pandas as pd
 import re
+import os
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 
 def load_movies(path="data/movies.csv"):
     """Load and preprocess the movies dataset."""
+    current_dir = os.path.dirname(__file__)
+    file_path = os.path.join(current_dir, path)
+
     movies = pd.read_csv(path)
     movies['genres'] = movies['genres'].fillna('')  # Replace missing genres
     movies['combined'] = movies['title'] + ' ' + movies['genres'].str.replace('|', ' ')  # Combine for TF-IDF
