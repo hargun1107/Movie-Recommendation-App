@@ -1,16 +1,8 @@
 import streamlit as st
-import os
-import requests
 from recommender import load_movies, MovieRecommender
 
 # ========================= CONFIG =========================
 st.set_page_config(page_title="🎬 Movie Recommender App", layout="wide")
-
-# ========================= SAFE API KEY HANDLER =========================
-try:
-    TMDB_API_KEY = st.secrets["TMDB_API_KEY"]
-except Exception:
-    TMDB_API_KEY = os.getenv("TMDB_API_KEY", "24348beca939332e499f0b8d9dc1ae73")
 
 # ========================= CUSTOM CSS =========================
 st.markdown("""
@@ -73,23 +65,6 @@ st.markdown("<h1 class='title'>🎬 Movie Recommender App</h1>", unsafe_allow_ht
 movies = load_movies("data/movies.csv")
 recommender = MovieRecommender(movies)
 
-# ========================= TMDB POSTER FETCH FUNCTION =========================
-def get_poster(title):
-    """Fetch poster using TMDB API."""
-    if not TMDB_API_KEY:
-        return None
-    try:
-        url = f"https://api.themoviedb.org/3/search/movie?api_key={TMDB_API_KEY}&query={title}"
-        response = requests.get(url)
-        data = response.json()
-        if data.get('results'):
-            poster_path = data['results'][0].get('poster_path')
-            if poster_path:
-                return f"https://image.tmdb.org/t/p/w500{poster_path}"
-    except Exception:
-        return None
-    return None
-
 # ========================= UI LAYOUT =========================
 col1, col2 = st.columns([1, 2])
 
@@ -117,10 +92,7 @@ with col2:
             cols = st.columns(3)
             for i, (_, row) in enumerate(results.iterrows()):
                 with cols[i % 3]:
-                    poster_url = get_poster(row['title'])
                     st.markdown("<div class='movie-card'>", unsafe_allow_html=True)
-                    if poster_url:
-                        st.image(poster_url, use_container_width=True)
                     st.markdown(f"<div class='movie-title'>{row['title']}</div>", unsafe_allow_html=True)
                     for genre in row['genres'].split('|'):
                         st.markdown(f"<span class='genre-tag'>{genre}</span>", unsafe_allow_html=True)
