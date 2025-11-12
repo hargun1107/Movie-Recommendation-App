@@ -65,25 +65,14 @@ st.markdown("<h1 class='title'>🎬 Movie Recommender App</h1>", unsafe_allow_ht
 movies = load_movies("data/movies.csv")
 recommender = MovieRecommender(movies)
 
-# ========================= STATE HANDLING =========================
-if "movie_title" not in st.session_state:
-    st.session_state.movie_title = ""
-
-def clear_input():
-    st.session_state.movie_title = ""
-
 # ========================= UI LAYOUT =========================
 col1, col2 = st.columns([1, 2])
 
 with col1:
     st.subheader("🔍 Find Similar Movies")
-    movie_title = st.text_input("Enter a movie title:", st.session_state.movie_title, key="movie_title_input")
-    
-    col_buttons = st.columns(2)
-    with col_buttons[0]:
-        recommend_button = st.button("🎥 Recommend")
-    with col_buttons[1]:
-        clear_button = st.button("🧹 Clear", on_click=clear_input)
+    movie_title = st.text_input("Enter a movie title:")
+
+    recommend_button = st.button("🎥 Recommend")
 
 with col2:
     if recommend_button and movie_title.strip():
