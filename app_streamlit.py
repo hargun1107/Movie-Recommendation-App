@@ -6,6 +6,12 @@ from recommender import load_movies, MovieRecommender
 # ========================= CONFIG =========================
 st.set_page_config(page_title="🎬 Movie Recommender App", layout="wide")
 
+# ========================= SAFE API KEY HANDLER =========================
+try:
+    TMDB_API_KEY = st.secrets["TMDB_API_KEY"]
+except Exception:
+    TMDB_API_KEY = os.getenv("TMDB_API_KEY", "24348beca939332e499f0b8d9dc1ae73")
+
 # ========================= CUSTOM CSS =========================
 st.markdown("""
 <style>
@@ -57,15 +63,6 @@ st.markdown("""
         text-align: center;
         margin-top: 30px;
     }
-    @media (max-width: 768px) {
-        .movie-card {
-            margin: 5px;
-            padding: 10px;
-        }
-        .movie-title {
-            font-size: 16px;
-        }
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -76,9 +73,7 @@ st.markdown("<h1 class='title'>🎬 Movie Recommender App</h1>", unsafe_allow_ht
 movies = load_movies("data/movies.csv")
 recommender = MovieRecommender(movies)
 
-# ========================= TMDB CONFIG =========================
-TMDB_API_KEY = st.secrets.get("TMDB_API_KEY", os.getenv("TMDB_API_KEY"))
-
+# ========================= TMDB POSTER FETCH FUNCTION =========================
 def get_poster(title):
     """Fetch poster using TMDB API."""
     if not TMDB_API_KEY:
@@ -87,7 +82,7 @@ def get_poster(title):
         url = f"https://api.themoviedb.org/3/search/movie?api_key={TMDB_API_KEY}&query={title}"
         response = requests.get(url)
         data = response.json()
-        if data['results']:
+        if data.get('results'):
             poster_path = data['results'][0].get('poster_path')
             if poster_path:
                 return f"https://image.tmdb.org/t/p/w500{poster_path}"
@@ -113,7 +108,8 @@ with col1:
 
 with col2:
     if recommend_button and movie_title.strip():
-        results = recommender.recommend(movie_title, n=6)
+        with st.spinner("✨ Finding similar movies..."):
+            results = recommender.recommend(movie_title, n=6)
         if len(results) == 0:
             st.markdown("<div class='no-results'>❌ No matches found. Try another title.</div>", unsafe_allow_html=True)
         else:
@@ -129,5 +125,7 @@ with col2:
                     for genre in row['genres'].split('|'):
                         st.markdown(f"<span class='genre-tag'>{genre}</span>", unsafe_allow_html=True)
                     st.markdown("</div>", unsafe_allow_html=True)
+            st.success("✅ Recommendations loaded successfully!")
+            st.balloons()
     elif not movie_title.strip() and recommend_button:
         st.markdown("<div class='no-results'>⚠️ Please enter a movie title.</div>", unsafe_allow_html=True)
