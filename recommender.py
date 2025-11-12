@@ -37,7 +37,7 @@ class MovieRecommender:
 
         idx = self.indices[title]
         # Enumerate to get (movie_index, similarity_score)
-        scores = list(enumerate(self.similarity[idx].tolist()[0]))  # convert to list to avoid numpy ambiguity
+        scores = list(enumerate(self.similarity[idx].flattern().tolist()))
         scores = sorted(scores, key=lambda x: x[1], reverse=True)
         movie_indices = [i[0] for i in scores[1:n + 1]]
 
