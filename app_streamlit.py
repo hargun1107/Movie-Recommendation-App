@@ -76,8 +76,12 @@ st.markdown("<h1 class='title'>🎬 Movie Recommender App</h1>", unsafe_allow_ht
 movies = load_movies("data/movies.csv")
 recommender = MovieRecommender(movies)
 
+TMDB_API_KEY = None
+try:
+    TMDB_API_KEY = st.secrets.get("TMDB_API_KEY", None)
+except Exception:
+    TMDB_API_KEY = os.getenv("TMDB_API_KEY")
 
-TMDB_API_KEY = st.secrets.get("TMDB_API_KEY") if st.secrets else os.getenv("TMDB_API_KEY")
 
 def get_poster(title):
     """Fetch movie poster using TMDB API."""
