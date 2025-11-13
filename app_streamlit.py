@@ -93,7 +93,8 @@ if recommend_button:
     if len(results) == 0:
         st.markdown("<p class='no-results'>❌ No matches found. Try another title.</p>", unsafe_allow_html=True)
     else:
-        st.subheader(f"🎞 Recommendations for: **{movie_title}**")
+        st.balloons()
+        st.subheader(f"🎞 Recommendations for movies similar to **{movie_title}**")
 
         for _, row in results.iterrows():
             st.markdown(f"""
