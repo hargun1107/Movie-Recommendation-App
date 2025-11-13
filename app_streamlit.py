@@ -4,11 +4,55 @@ from recommender import load_movies, MovieRecommender
 # ========================= PAGE CONFIG =========================
 st.set_page_config(page_title="🎬 Movie Recommender App", layout="wide")
 
-# ========================= THEME TOGGLE =========================
-st.sidebar.title("🎨 Appearance")
-theme = st.sidebar.selectbox("Choose Theme", ["Dark", "Light"])
+# ========================= CUSTOM TOGGLE SWITCH =========================
+toggle_css = """
+<style>
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 70px;
+  height: 34px;
+}
+.switch input {display:none;}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+.slider:before {
+  position: absolute;
+  content: "🌙";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+  text-align: center;
+  padding-top: 2px;
+  font-size: 16px;
+}
+input:checked + .slider {
+  background-color: #4CAF50;
+}
+input:checked + .slider:before {
+  transform: translateX(36px);
+  content: "☀️";
+}
+</style>
+"""
 
-# Theme colors
+st.markdown(toggle_css, unsafe_allow_html=True)
+
+# Switch widget
+theme_switch = st.sidebar.checkbox("Toggle Theme", value=True)
+theme = "Dark" if theme_switch else "Light"
+
+# ========================= THEME COLORS =========================
 if theme == "Dark":
     background = "#0b0b0b"
     text_color = "#e5e5e5"
@@ -16,7 +60,7 @@ if theme == "Dark":
     title_color = "#e50914"
     genre_bg = "#222"
     genre_text = "#e50914"
-else:  # Light mode
+else:
     background = "#f5f5f5"
     text_color = "#111111"
     card_color = "#ffffff"
@@ -24,7 +68,7 @@ else:  # Light mode
     genre_bg = "#eee"
     genre_text = "#d90429"
 
-# ========================= CSS (Dynamic Theme) =========================
+# ========================= CSS =========================
 st.markdown(f"""
 <style>
     body {{
@@ -49,7 +93,7 @@ st.markdown(f"""
         text-align: center;
         margin: 10px;
         transition: transform 0.3s ease;
-        border: 1px solid rgba(255,255,255,0.09);
+        border: 1px solid rgba(255,255,255,0.1);
     }}
     .movie-card:hover {{
         transform: scale(1.03);
@@ -82,16 +126,18 @@ st.markdown(f"""
 # ========================= HEADER =========================
 st.markdown("<h1 class='title'>🎬 Movie Recommender App</h1>", unsafe_allow_html=True)
 
-# ========================= LOAD MOVIE DATA =========================
+# ========================= LOAD MOVIES =========================
 movies = load_movies("data/movies.csv")
 recommender = MovieRecommender(movies)
 
-# ========================= UI LAYOUT =========================
+# ========================= AUTOCOMPLETE MOVIE LIST =========================
+movie_list = sorted(movies['title'].unique())
+
 col1, col2 = st.columns([1, 2])
 
 with col1:
     st.subheader("🔍 Find Similar Movies")
-    movie_title = st.text_input("Enter a movie title:")
+    movie_title = st.selectbox("Search or choose a movie:", movie_list)
 
     recommend_button = st.button("🎥 Recommend")
 
@@ -119,9 +165,3 @@ with col2:
 
             st.success("✅ Recommendations loaded!")
             st.balloons()
-
-    elif recommend_button and not movie_title.strip():
-        st.markdown(
-            "<div class='no-results'>⚠️ Please enter a movie title.</div>",
-            unsafe_allow_html=True
-        )
